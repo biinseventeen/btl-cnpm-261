@@ -1,38 +1,47 @@
 import { create } from 'zustand'
 import {
-  initialChargingPoints, initialChargingRequests, initialHubs, initialIncidents,
-  initialParkingReservations, initialParkingSlots, initialSimulationPreview, initialVehicles,
+  createSeedData, initialChargingPoints, initialChargingRequests, initialHubs, initialIncidents,
+  initialParkingReservations, initialParkingSlots, initialPrivateEVs, initialSimulationPreview, initialVehicles,
 } from '../data/mockData'
 import type {
   ChargingPoint, ChargingRequest, DispatchOrder, Hub, OperationalIncident,
-  ParkingReservation, ParkingSlot, SimulationPreview, Vehicle,
+  ParkingReservation, ParkingSlot, PrivateEV, SimulationPreview, Vehicle,
 } from '../types'
+import { createParkingSlice, watchChargingRequests, type ParkingSlice } from './parkingSlice'
 
-interface MobilityState {
+export type NewIncident = Pick<OperationalIncident, 'assetId' | 'hubId' | 'title' | 'severity'>
+
+interface CoreState {
   hubs: Hub[]
   vehicles: Vehicle[]
   chargingRequests: ChargingRequest[]
   chargingPoints: ChargingPoint[]
   parkingSlots: ParkingSlot[]
   parkingReservations: ParkingReservation[]
+  privateEVs: PrivateEV[]
   incidents: OperationalIncident[]
   dispatchOrders: DispatchOrder[]
   simulationPreview: SimulationPreview
   reserveVehicle: (vehicleId: string) => void
   returnVehicle: (vehicleId: string, destinationHubId: string, battery: number) => void
   scheduleChargingRequest: (requestId: string, chargingPointId: string) => void
-  createParkingReservation: (studentId: string, hubId: string) => void
   applySimulationRecommendation: () => 'APPLIED' | 'STALE' | 'INVALID'
   resolveIncident: (incidentId: string) => void
+  raiseIncident: (incident: NewIncident) => string
+  resetDemo: () => void
 }
 
-export const useMobilityStore = create<MobilityState>((set, get) => ({
+export type MobilityState = CoreState & ParkingSlice
+
+export const useMobilityStore = create<MobilityState>()((set, get, api) => ({
+  ...createParkingSlice(set, get, api),
   hubs: initialHubs,
   vehicles: initialVehicles,
   chargingRequests: initialChargingRequests,
   chargingPoints: initialChargingPoints,
   parkingSlots: initialParkingSlots,
   parkingReservations: initialParkingReservations,
+  privateEVs: initialPrivateEVs,
   incidents: initialIncidents,
   dispatchOrders: [],
   simulationPreview: initialSimulationPreview,
@@ -74,19 +83,6 @@ export const useMobilityStore = create<MobilityState>((set, get) => ({
     }
   }),
 
-  createParkingReservation: (studentId, hubId) => set((state) => {
-    const hub = state.hubs.find((item) => item.hubId === hubId)
-    if (!hub || hub.occupiedSlots + hub.heldSlots + hub.incomingReserved >= hub.totalSlots) return state
-    const reservation: ParkingReservation = {
-      reservationId: `PR-${String(state.parkingReservations.length + 1).padStart(3, '0')}`,
-      studentId, hubId, status: 'HELD', arrivalTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-    }
-    return {
-      parkingReservations: [...state.parkingReservations, reservation],
-      hubs: state.hubs.map((item) => item.hubId === hubId ? { ...item, heldSlots: item.heldSlots + 1 } : item),
-    }
-  }),
-
   applySimulationRecommendation: () => {
     const state = get()
     const preview = state.simulationPreview
@@ -113,4 +109,16 @@ export const useMobilityStore = create<MobilityState>((set, get) => ({
     incidents: state.incidents.map((incident) => incident.incidentId === incidentId
       ? { ...incident, status: 'RESOLVED' } : incident),
   })),
+
+  raiseIncident: (incident) => {
+    const incidentId = `INC-${String(get().incidents.length + 1).padStart(3, '0')}`
+    set((state) => ({
+      incidents: [...state.incidents, { ...incident, incidentId, status: 'OPEN', createdAt: new Date().toISOString() }],
+    }))
+    return incidentId
+  },
+
+  resetDemo: () => set({ ...createSeedData(), dispatchOrders: [] }),
 }))
+
+watchChargingRequests(useMobilityStore)

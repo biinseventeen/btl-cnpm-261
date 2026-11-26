@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from 'react-router'
-import { Activity, BatteryCharging, CarFront, LayoutDashboard, ParkingSquare } from 'lucide-react'
+import { BatteryCharging, CarFront, LayoutDashboard, ParkingSquare, PlugZap, ScanLine } from 'lucide-react'
 
 const links = [
   { to: '/operator', label: 'Operation', icon: LayoutDashboard },
   { to: '/student/vehicles', label: 'Vehicle Journey', icon: CarFront },
   { to: '/charging', label: 'Charging', icon: BatteryCharging },
-  { to: '/parking', label: 'Parking & Private EV', icon: ParkingSquare },
+  { to: '/student/parking', label: 'Đặt chỗ đỗ', icon: ParkingSquare },
+  { to: '/student/private-ev', label: 'Xe cá nhân & lịch sạc', icon: PlugZap },
+  { to: '/operator/parking-slots', label: 'Giám sát ô đỗ', icon: ScanLine },
 ]
 
 export default function AppShell() {
@@ -25,7 +27,7 @@ export default function AppShell() {
           <p className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Modules</p>
           <nav className="grid gap-1">
             {links.map(({ to, label, icon: Icon }) => (
-              <NavLink key={to} to={to} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-teal-50 text-teal-800' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <NavLink key={to} to={to} end={to === '/operator'} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${isActive ? 'bg-teal-50 text-teal-800' : 'text-slate-600 hover:bg-slate-50'}`}>
                 <Icon size={17} /> {label}
               </NavLink>
             ))}

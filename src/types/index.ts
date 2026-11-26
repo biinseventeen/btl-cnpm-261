@@ -49,6 +49,27 @@ export interface ChargingRequest {
   createdAt: string
   scheduledStart?: string
   chargingPointId?: string
+  // Private EV requests (source STUDENT): vehicleId holds the PrivateEV evId
+  requesterId?: string
+  desiredStart?: string
+  desiredEnd?: string
+  nextUseAt?: string
+  batteryVerified?: boolean
+}
+
+// Status history of private EV charging requests, recorded by the Parking module (PK-02f)
+export type ChargingRequestEventType =
+  | 'SUBMITTED' | 'SCHEDULED' | 'SCHEDULE_CHANGED' | 'RESCHEDULED'
+  | 'CHARGING' | 'FULFILLED' | 'EXPIRED' | 'CANCELLED'
+export interface ChargingRequestEvent {
+  eventId: string
+  requestId: string
+  type: ChargingRequestEventType
+  at: string
+  chargingPointId?: string
+  scheduledStart?: string
+  previousChargingPointId?: string
+  previousScheduledStart?: string
 }
 
 export type ChargingPointStatus = 'AVAILABLE' | 'ASSIGNED' | 'CHARGING' | 'ERROR'
@@ -61,10 +82,12 @@ export interface ChargingPoint {
 }
 
 export type ParkingSlotStatus = 'FREE' | 'ASSIGNED' | 'OCCUPIED' | 'UNAVAILABLE'
+export type ParkingSensorStatus = 'ONLINE' | 'STALE' | 'FAULT'
 export interface ParkingSlot {
   slotId: string
   hubId: HubId
   status: ParkingSlotStatus
+  sensorStatus: ParkingSensorStatus
   vehicleId?: string
 }
 
@@ -75,14 +98,33 @@ export type ParkingReservationStatus =
   | 'CHECK_IN_FAILED'
   | 'CANCELLED'
   | 'EXPIRED'
+  | 'COMPLETED'
+
+export type ParkingFailureReason = 'HUB_FULL' | 'NO_PHYSICAL_SLOT' | 'SENSOR_UNAVAILABLE'
 
 export interface ParkingReservation {
   reservationId: string
   studentId: string
   hubId: HubId
   status: ParkingReservationStatus
+  evId?: string
   slotId?: string
   arrivalTime: string
+  expiresAt: string
+  createdAt: string
+  checkedInAt?: string
+  slotHoldExpiresAt?: string
+  failureReason?: ParkingFailureReason
+}
+
+export interface PrivateEV {
+  evId: string
+  ownerStudentId: string
+  plateNumber: string
+  model: string
+  // Missing or stale telemetry means the student enters the battery level manually
+  battery?: number
+  lastTelemetryAt?: string
 }
 
 export type IncidentStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
