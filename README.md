@@ -1,106 +1,85 @@
 # Smart E-Mobility Hub — L01-N8
 
-Starter repository cho MVP demo môn CO3001. UI hiện tại chỉ là skeleton minh họa luồng dữ liệu; các thành viên cần thay phần trình bày bằng màn hình Figma đã có.
+MVP frontend cho đồ án CO3001. Ứng dụng dùng mock data và Zustand để minh họa các luồng xe điện, sạc, bãi đỗ và vận hành. Dữ liệu chỉ lưu trong bộ nhớ trình duyệt và được khởi tạo lại khi tải trang.
 
-## Tech stack
-- React + Vite + TypeScript
-- Tailwind CSS v4 (Vite plugin)
-- React Router v7
-- Zustand v5
-- Lucide React
+## Công nghệ và chạy ứng dụng
 
-## Yêu cầu
-- Node.js 22.12+ (hoặc phiên bản Vite hỗ trợ)
-- npm
-- Git
+- React 19, Vite 7, TypeScript
+- Tailwind CSS v4, React Router v7, Zustand v5, Lucide React
+- Yêu cầu Node.js 22.12+ và npm
 
-## Chạy local
 ```bash
 npm install
 npm run dev
 ```
 
-Mở URL Vite hiển thị trong terminal (thường là http://localhost:5173).
+Kiểm tra bản production bằng `npm run build`; chạy thử bằng `npm run preview`.
 
-## Kiểm tra build
-```bash
-npm run build
-npm run preview
-```
+## Cấu trúc và quyền sở hữu
 
-## Routes hiện có
-- `/operator` — Operation dashboard / simulation preview
-- `/student/vehicles` — Vehicle Journey & Reservation
-- `/charging` — Charging queue & points
-- `/parking` — Parking & Private EV
-
-## Cấu trúc mã nguồn
 ```text
 src/
-  app/                    # Router và App root
-  components/layout/      # App shell, navigation
-  components/shared/      # Component dùng chung
-  features/               # Mỗi thành viên sở hữu một feature
-    vehicle-journey/      # Khải
-    charging/             # Kiệt
-    parking/              # Lợi
-    operation/            # Thịnh
-  store/                  # Shared Zustand store
-  types/                  # Shared data contract
-  data/                   # Mock/seed data
+  app/                         # App root và route definitions
+  components/layout/            # App shell và navigation
+  components/shared/            # UI dùng chung
+  data/mockData.ts              # Seed data dùng chung
+  features/
+    vehicle-journey/            # UI: Lợi; business logic: Khải
+    charging/                   # UI: Lợi; business logic: Kiệt
+    parking/                    # UI: Lợi; business logic: Thịnh
+    operation/                  # UI: Lợi; business logic: Thịnh
+  store/useMobilityStore.ts     # Shared state và store actions
+  types/index.ts                # Shared data contracts
 ```
 
-## Quy ước làm việc nhóm
-1. Không tạo project Vite riêng. Tất cả cùng phát triển trên repository này.
-2. Mỗi thành viên chỉ chỉnh sửa trực tiếp trong `src/features/<module>` và file style/component riêng của module, trừ khi đã thống nhất thay đổi file chung.
-3. `src/types/index.ts` là data contract chung. Muốn thêm/sửa field hoặc enum phải trao đổi với Thịnh trước khi merge.
-4. `src/store/useMobilityStore.ts` là shared state. Không tạo bản sao dữ liệu Hub/Vehicle/ChargingRequest trong từng feature.
-5. `src/data/mockData.ts` là dữ liệu khởi tạo thống nhất; không hard-code cùng một thực thể ở nhiều nơi.
-6. Mọi action cần thay đổi shared state thông qua store action. UI không tự sửa object trực tiếp.
-7. Không push thẳng lên `main`. Tạo feature branch và merge qua Pull Request hoặc nhờ Thịnh review.
-8. Trước khi push, phải chạy `npm run build` và xử lý lỗi TypeScript.
+Lợi phụ trách mọi page/presentation `.tsx`, shared components, layout, routing, styles và nối UI với store actions. Khải phụ trách logic Vehicle Journey; Kiệt phụ trách logic Charging; Thịnh phụ trách logic Parking/Private EV và Operation/Simulation, cùng shared types, store, mock data và integration.
 
-## Branch convention
-- `main`: bản tích hợp ổn định
-- `feat/operation-*`: Thịnh
-- `feat/vehicle-journey-*`: Khải
-- `feat/charging-*`: Kiệt
-- `feat/parking-*`: Lợi
+Các route hiện có: `/operator`, `/student/vehicles`, `/charging`, `/parking`. Không tạo app hoặc bản sao dữ liệu riêng cho từng feature. UI đọc/cập nhật domain state qua `useMobilityStore`; thay đổi shared types/store/mock data cần được thống nhất và cập nhật các consumer liên quan.
 
-## Khởi tạo Git và đẩy lên GitHub
-Trong thư mục project, chạy:
-```bash
-git init
-git add .
-git commit -m "chore: initialize Smart E-Mobility Hub MVP"
-git branch -M main
-```
+## Git workflow để làm việc và tự push
 
-Tạo repository rỗng trên GitHub với tên `smart-emobility-hub` (không tạo README, .gitignore hay license từ GitHub), sau đó thay `<YOUR_GITHUB_USERNAME>` bằng username của bạn:
+Nhánh chuẩn của nhóm: `main` (ổn định), `integration` (tích hợp), `feat/thinh-business-logic`, `feat/vehicle-journey-logic`, `feat/charging-logic`, `feat/frontend`. Tạo nhánh công việc từ `integration`, chỉ sửa phần thuộc trách nhiệm của mình, rồi mở PR vào `integration`.
+
+Lệnh bắt đầu một nhánh Thịnh mới:
 
 ```bash
-git remote add origin https://github.com/<YOUR_GITHUB_USERNAME>/smart-emobility-hub.git
-git push -u origin main
+git status --short --branch
+git switch integration
+git pull --ff-only origin integration
+git switch -c feat/thinh-business-logic
 ```
 
-Nếu repository thuộc GitHub Organization của nhóm, thay URL bằng URL repository của Organization.
+Sau khi sửa và build thành công, stage đúng các file bạn đã xem lại rồi commit và push nhánh feature:
 
-## Thành viên clone project
 ```bash
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/smart-emobility-hub.git
-cd smart-emobility-hub
-npm install
-npm run dev
+npm run build
+git status --short
+git add README.md src/features/operation/README.md src/features/parking/README.md src/features/charging/README.md src/features/vehicle-journey/README.md
+git commit -m "docs(workflow): align repository guidance with AGENTS.md"
+git push -u origin feat/thinh-business-logic
 ```
 
-## Demo store hiện tại
-- Reserve một vehicle khả dụng.
-- Return vehicle với battery 15% để tạo yêu cầu sạc hệ thống.
-- Assign một charging point khả dụng cho request đang WAITING.
-- Tạo parking reservation.
-- Apply What-if preview; store revalidates số xe khả dụng trước khi tạo DispatchOrder. Đây chỉ là logic demo phía client, chưa thay thế transaction/backend thực tế.
+Nếu nhánh feature đã tồn tại, không chạy lại `switch -c`. Cập nhật nhánh trước khi push bằng:
 
-## Ghi chú
-- Dữ liệu chỉ nằm trong memory của Zustand và reset khi reload. Local Storage/backend chưa được nối.
-- Chưa có authentication, phân quyền, API, database, MQTT hay tích hợp IoT thật.
-- Các nút mô phỏng là scaffold để nhóm phát triển tiếp, không phải sản phẩm hoàn chỉnh.
+```bash
+git fetch origin
+git merge origin/integration
+git push
+```
+
+Để giảm xung đột, không làm trực tiếp trên `main`/`integration`, không sửa file ngoài phạm vi ownership nếu chưa phối hợp, và báo trước khi thay đổi `src/types/index.ts`, `src/store/useMobilityStore.ts`, `src/data/mockData.ts`, routes hoặc shared UI. Nếu Git báo conflict, dừng lại xử lý và kiểm tra từng file trước khi commit; không dùng `reset`, force-push hoặc ghi đè thay đổi của người khác. Workflow này giảm khả năng xung đột nhưng không thể bảo đảm tuyệt đối khi nhiều người cùng sửa một file.
+
+## Quy ước commit
+
+Dùng Conventional Commits: `<type>(<scope>): <mô tả ngắn>`. Ví dụ:
+
+- `feat(parking): add reservation check-in flow`
+- `fix(operation): revalidate dispatch capacity`
+- `chore(store): keep demo seed data deterministic`
+- `docs(workflow): align repository guidance with AGENTS.md`
+
+Các type thường dùng: `feat`, `fix`, `docs`, `refactor`, `chore`. Không commit file build, secrets hoặc `.env`.
+
+## Phạm vi MVP
+
+Đây là frontend demo dùng mock data; chưa có backend, database, authentication, MQTT hay kết nối IoT thật. Store hiện tại chạy trong bộ nhớ và reset khi reload.
