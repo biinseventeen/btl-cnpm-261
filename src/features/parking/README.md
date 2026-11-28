@@ -1,7 +1,6 @@
 # Parking & Private EV
 
-- **UI/presentation:** Lợi (`pages/`, `components/`, `ui.tsx`).
-- **Business logic:** Thịnh (`src/store/parkingSlice.ts`). Bản hiện tại do Lợi viết trước khi đổi phân công, Thịnh review và tiếp quản.
+- **Phụ trách (UI và logic):** Lợi (`pages/`, `components/`, `ui.tsx`, `src/store/parkingSlice.ts`), theo file phân công Submission 4.
 
 Đặt chỗ đỗ xe cá nhân, check-in theo cảm biến, giám sát ô đỗ và gửi yêu cầu sạc xe cá nhân. Bám Figma `ui-mockup`, section "Sửa Sub2 + UI ngoại lệ Sub3 · Bùi Hữu Lợi".
 

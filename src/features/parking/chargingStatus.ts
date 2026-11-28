@@ -56,7 +56,7 @@ export const describeEvent = (event: ChargingRequestEvent, request: ChargingRequ
     case 'RESCHEDULED': return { title: 'Lịch bị hủy', tone: 'danger', detail: `Cổng ${event.previousChargingPointId ?? '—'} không còn dành cho bạn. Yêu cầu quay lại hàng đợi.` }
     case 'CHARGING': return { title: 'Bắt đầu sạc', tone: 'success', detail: `Tại cổng ${event.chargingPointId ?? '—'}.` }
     case 'FULFILLED': return { title: 'Đã sạc xong', tone: 'success', detail: 'Phiên sạc kết thúc.' }
-    case 'EXPIRED': return { title: 'Hết hạn', tone: 'danger', detail: 'Không xếp được cổng trong khung giờ mong muốn.' }
+    case 'EXPIRED': return { title: 'Hết hạn', tone: 'danger', detail: 'Không xếp được cổng trong khung giờ mong muốn, hoặc xe không cắm sạc trong thời gian giữ cổng.' }
     case 'CANCELLED': return { title: 'Đã hủy', tone: 'neutral', detail: 'Yêu cầu đã được hủy.' }
   }
 }

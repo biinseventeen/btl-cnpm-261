@@ -1,7 +1,8 @@
 # Vehicle Journey & Reservation
 
-- **UI/presentation:** Lợi (`pages/`, `components/`, `journey.ts`).
-- **Business logic:** Khải (`src/store/vehicleJourneySlice.ts`). Bản đầu do Lợi viết để nối UI, Khải review và tiếp quản.
+- **Phụ trách (UI và logic):** Khải, theo file phân công Submission 4.
+- **Kiểm tra UI so với Figma:** Lợi.
+- Code hiện tại (`pages/`, `components/`, `src/store/vehicleJourneySlice.ts`) là bản nháp Lợi dựng theo Figma để cả nhóm chạy thử luồng xuyên module. Khải toàn quyền viết lại, sửa hoặc xóa.
 
 Màn sinh viên đóng vai `S-02` (`src/lib/demoUser.ts`).
 
