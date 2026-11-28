@@ -20,30 +20,21 @@ Kiểm tra bản production bằng `npm run build`; chạy thử bằng `npm run
 ```text
 src/
   app/                         # App root và route definitions
-  app/demoClock.ts              # Đồng hồ demo 5 giây: telemetry, hết hạn đơn
-  components/layout/            # WorkspaceLayout sinh viên / vận hành
+  components/layout/            # App shell và navigation
   components/shared/            # UI dùng chung
-  lib/                          # Format, nhãn trạng thái, hook dùng chung
   data/mockData.ts              # Seed data dùng chung
   features/
     vehicle-journey/            # UI: Lợi; business logic: Khải
     charging/                   # UI: Lợi; business logic: Kiệt
     parking/                    # UI: Lợi; business logic: Thịnh
     operation/                  # UI: Lợi; business logic: Thịnh
-  store/                        # useMobilityStore + slice theo module, có test
+  store/useMobilityStore.ts     # Shared state và store actions
   types/index.ts                # Shared data contracts
 ```
 
 Lợi phụ trách mọi page/presentation `.tsx`, shared components, layout, routing, styles và nối UI với store actions. Khải phụ trách logic Vehicle Journey; Kiệt phụ trách logic Charging; Thịnh phụ trách logic Parking/Private EV và Operation/Simulation, cùng shared types, store, mock data và integration.
 
-Route (bảng chi tiết trong README từng feature):
-
-| Không gian | Route |
-|---|---|
-| Sinh viên | `/student/vehicles`, `/student/vehicles/:vehicleId/reserve`, `/student/trips`, `/student/trips/pickup`, `/student/parking/*`, `/student/private-ev/*` |
-| Vận hành | `/operator`, `/operator/hubs`, `/operator/charging-queue`, `/operator/dispatch`, `/operator/incidents`, `/operator/simulation`, `/operator/simulation/result`, `/operator/parking-slots` |
-
-`/` chuyển về `/student/vehicles`; `/charging` và `/parking` cũ chuyển sang route mới. Store chia slice theo người phụ trách logic: `vehicleJourneySlice.ts` (Khải), `chargingSlice.ts` (Kiệt), `parkingSlice.ts` và `operationSlice.ts` (Thịnh), helper chung ở `storeUtils.ts`. Chạy test bằng `npm test`. Không tạo app hoặc bản sao dữ liệu riêng cho từng feature. UI đọc/cập nhật domain state qua `useMobilityStore`; thay đổi shared types/store/mock data cần được thống nhất và cập nhật các consumer liên quan.
+Các route hiện có: `/operator`, `/student/vehicles`, `/charging`, `/parking`. Không tạo app hoặc bản sao dữ liệu riêng cho từng feature. UI đọc/cập nhật domain state qua `useMobilityStore`; thay đổi shared types/store/mock data cần được thống nhất và cập nhật các consumer liên quan.
 
 ## Git workflow để làm việc và tự push
 

@@ -1,33 +1,6 @@
 # Vehicle Journey & Reservation
 
-- **UI/presentation:** Lợi (`pages/`, `components/`, `journey.ts`).
-- **Business logic:** Khải (`src/store/vehicleJourneySlice.ts`). Bản đầu do Lợi viết để nối UI, Khải review và tiếp quản.
+- **UI/presentation:** Lợi (`VehicleJourneyPage.tsx` and visual components).
+- **Business logic:** Khải; shared contracts/state live in `src/types/` and `src/store/`.
 
-Màn sinh viên đóng vai `S-02` (`src/lib/demoUser.ts`).
-
-## Route
-
-| Route | Màn hình | Frame Figma |
-|---|---|---|
-| `/student/vehicles` | Bản đồ Hub, danh sách xe, chi tiết xe (`?hubId=` chọn sẵn Hub) | VJ-01 `59:3` |
-| `/student/vehicles/:vehicleId/reserve` | Xác nhận giữ xe, xe vừa bị người khác đặt | VJ-03 `67:2`, VJ-03e `161:3` |
-| `/student/trips` | Phiếu đang giữ, phiếu hết hạn, hành trình đang đi, trả xe khi Hub đầy, tóm tắt | VJ-03f `161:202`, VJ-04 `68:2`, VJ-05 `68:295` |
-| `/student/trips/pickup` | Quét QR nhận xe (bản desktop của frame mobile) | `113:11`, `113:70` |
-
-## Store
-
-| Action | Việc |
-|---|---|
-| `reserveSharedVehicle` | Xe AVAILABLE, pin > 20%, heartbeat còn hiệu lực → RESERVED, giữ 15 phút. Mỗi sinh viên một phiếu mở. Mã `VJ-YYMMDD-xxx` |
-| `cancelVehicleReservation` | RESERVED → CANCELLED, xe về AVAILABLE |
-| `pickUpVehicle` | Mã QR phải khớp mã xe → IN_USE, Hub giảm 1 chỗ đang đỗ, lưu pin lúc nhận |
-| `toggleTripLock`, `reportTripIssue` | Tạm khóa khi đang đi; báo sự cố tạo incident |
-| `returnSharedVehicle` | Hub đầy → `HUB_FULL`, hành trình giữ nguyên. Ưu tiên kết quả: mất heartbeat → DISCONNECTED; lỗi → UNAVAILABLE (cả hai tạo incident); pin ≤ 20% → PENDING_CHARGING + 1 yêu cầu sạc SYSTEM; còn lại AVAILABLE |
-| `sweepVehicleReservations` | Phiếu quá hạn → EXPIRED, xe về AVAILABLE (chạy mỗi 5 giây qua `demoClock`) |
-| `setVehicleTelemetry`, `tickVehicleTelemetry` | Bảng mô phỏng telemetry; pin giảm 0,4%/phút khi đang đi |
-
-Test: `src/store/vehicleJourneySlice.test.ts`.
-
-## Kịch bản demo
-
-Tìm xe SM-016 ở Ga Metro → Đặt trước → Quét mã QR → Xác nhận nhận xe → chọn Hub đích Ký túc xá Khu B (đầy, nút trả bị khóa) → chọn Hub khác → bấm "Pin xe còn 15%" → Trả xe: xe sang Chờ sạc và có yêu cầu sạc mới trên `/operator/charging-queue`.
+The flow uses the shared Vehicle and Hub records. Reservation, simulated QR pickup, trip state, and return validation must update through named store actions so other modules see consistent occupancy and vehicle status.
