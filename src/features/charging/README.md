@@ -1,8 +1,7 @@
 # Charging & Resource Management
 
-- **Phụ trách (UI và logic):** Kiệt, theo file phân công Submission 4.
-- **Kiểm tra UI so với Figma:** Lợi.
-- Code hiện tại (`pages/`, `components/`, `src/store/chargingSlice.ts`) là bản nháp Lợi dựng theo Figma để cả nhóm chạy thử luồng xuyên module. Kiệt toàn quyền viết lại, sửa hoặc xóa.
+- **UI/presentation:** Lợi (`pages/`, `components/`).
+- **Business logic:** Kiệt (`src/store/chargingSlice.ts`). Bản đầu do Lợi viết để nối UI, Kiệt review và tiếp quản.
 
 ## Route
 
