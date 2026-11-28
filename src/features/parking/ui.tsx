@@ -1,100 +1,10 @@
-// Building blocks for the Parking & Private EV screens, colors taken from the Figma ui-mockup.
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { ArrowRight, CircleAlert, CircleCheck, Info } from 'lucide-react'
+// Parking-specific blocks; the generic ones come from the shared UI kit.
+import { ArrowRight, Info } from 'lucide-react'
 import type { ParkingReservationStatus } from '../../types'
-import { formatClock, formatTime } from './format'
+import { Card, CardTitle } from '../../components/shared/ui'
+import { formatTime } from './format'
 
-export type Tone = 'success' | 'warn' | 'danger' | 'info' | 'neutral'
-
-const cardTone: Record<Tone | 'default', string> = {
-  default: 'border-[#e4ece9] bg-white',
-  success: 'border-[#cfe6de] bg-[#e6f4ef]',
-  warn: 'border-[#f0dcb4] bg-[#fffaf0]',
-  danger: 'border-[#f3c5c0] bg-[#fff7f6]',
-  info: 'border-[#d5e4f1] bg-[#edf4fa]',
-  neutral: 'border-[#e4ece9] bg-[#f4f7f6]',
-}
-
-const tagTone: Record<Tone, string> = {
-  success: 'text-[#087f6a]',
-  warn: 'bg-[#fff4df] text-[#946013]',
-  danger: 'bg-[#fde8e6] text-[#b42318]',
-  info: 'bg-[#edf4fa] text-[#2b5f8e]',
-  neutral: 'bg-[#eaf0ee] text-[#5f716c]',
-}
-
-const noticeTone: Record<Tone, { box: string; title: string; body: string; Icon: typeof Info }> = {
-  success: { box: 'bg-[#e6f4ef]', title: 'text-[#087f6a]', body: 'text-[#087f6a]', Icon: CircleCheck },
-  warn: { box: 'bg-[#fff4df]', title: 'text-[#946013]', body: 'text-[#946013]', Icon: Info },
-  danger: { box: 'bg-[#fde8e6]', title: 'text-[#b42318]', body: 'text-[#b42318]', Icon: CircleAlert },
-  info: { box: 'bg-[#edf4fa]', title: 'text-[#2b5f8e]', body: 'text-[#2b5f8e]', Icon: Info },
-  neutral: { box: 'bg-[#f4f7f6]', title: 'text-[#17332f]', body: 'text-[#5f716c]', Icon: Info },
-}
-
-export function PageHeader({ eyebrow, title, subtitle, now }: { eyebrow: string; title: string; subtitle: ReactNode; now: number }) {
-  return <header className="flex flex-wrap items-start justify-between gap-3">
-    <div className="min-w-0">
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#087f6a]">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-semibold text-[#17332f] sm:text-3xl">{title}</h2>
-      <p className="mt-2 text-sm text-[#5f716c]">{subtitle}</p>
-    </div>
-    <p className="text-xs tabular-nums text-[#5f716c]">{formatClock(now)}</p>
-  </header>
-}
-
-export function Card({ tone = 'default', className = '', children }: { tone?: Tone | 'default'; className?: string; children: ReactNode }) {
-  return <section className={`rounded-2xl border p-5 sm:p-6 ${cardTone[tone]} ${className}`}>{children}</section>
-}
-
-export function CardTitle({ title, subtitle, action }: { title: string; subtitle?: ReactNode; action?: ReactNode }) {
-  return <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-    <div><h3 className="text-lg font-semibold text-[#17332f]">{title}</h3>{subtitle && <p className="mt-1 text-sm text-[#5f716c]">{subtitle}</p>}</div>
-    {action}
-  </div>
-}
-
-export function DetailRow({ label, value, strike = false, valueClassName = '' }: { label: string; value: ReactNode; strike?: boolean; valueClassName?: string }) {
-  return <div className="flex items-start justify-between gap-4 border-b border-[#e4ece9] py-3 text-sm last:border-0">
-    <span className="text-[#5f716c]">{label}</span>
-    <span className={`text-right font-semibold text-[#17332f] ${strike ? 'text-[#8a9a96] line-through' : ''} ${valueClassName}`}>{value}</span>
-  </div>
-}
-
-export function StatusTag({ tone, children }: { tone: Tone; children: ReactNode }) {
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold uppercase ${tagTone[tone]}`}>{children}</span>
-}
-
-export function BigCode({ children }: { children: ReactNode }) {
-  return <p className="mt-4 mb-2 break-all text-2xl font-semibold text-[#17332f]">{children}</p>
-}
-
-type ButtonVariant = 'primary' | 'outline' | 'danger'
-const buttonVariant: Record<ButtonVariant, string> = {
-  primary: 'bg-[#087f6a] text-white hover:bg-[#066b59] disabled:bg-[#9cc8bd]',
-  outline: 'border border-[#d7e2de] bg-white text-[#17332f] hover:bg-[#f4f7f6] disabled:text-[#8a9a96]',
-  danger: 'border border-[#f0b8b1] bg-white text-[#b42318] hover:bg-[#fff7f6] disabled:text-[#e3a49c]',
-}
-
-export function Button({ variant = 'primary', icon, className = '', children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; icon?: ReactNode }) {
-  return <button type="button" {...props}
-    className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition disabled:cursor-not-allowed ${buttonVariant[variant]} ${className}`}>
-    {icon}{children}
-  </button>
-}
-
-export function Notice({ tone, title, children }: { tone: Tone; title: ReactNode; children?: ReactNode }) {
-  const { box, title: titleColor, body, Icon } = noticeTone[tone]
-  return <div role={tone === 'danger' ? 'alert' : 'status'} className={`flex gap-3 rounded-xl p-4 ${box}`}>
-    <Icon size={18} className={`mt-0.5 shrink-0 ${titleColor}`} />
-    <div className="min-w-0"><p className={`text-sm font-semibold ${titleColor}`}>{title}</p>{children && <div className={`mt-1 text-sm leading-6 ${body}`}>{children}</div>}</div>
-  </div>
-}
-
-export const inputClass = 'w-full rounded-lg border border-[#d7e2de] bg-white px-3 py-2.5 text-sm text-[#17332f] outline-none focus:border-[#087f6a] focus:ring-2 focus:ring-[#087f6a]/20 disabled:bg-[#f4f7f6]'
-
-export function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: ReactNode }) {
-  return <div><label htmlFor={htmlFor} className="mb-2 block text-sm font-medium text-[#17332f]">{label}</label>{children}</div>
-}
+export * from '../../components/shared/ui'
 
 const mainFlow: { status: ParkingReservationStatus; label: string }[] = [
   { status: 'HELD', label: 'Đã giữ chỗ' },

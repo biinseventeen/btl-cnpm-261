@@ -8,7 +8,7 @@ import type { ParkingReservation } from '../../../types'
 import SlotGrid from '../components/SlotGrid'
 import { DEMO_STUDENT_ID } from '../constants'
 import { checkInErrorMessage, failureMessage, formatCountdown, formatDateTime, formatShortDate, formatTime, slotLocation } from '../format'
-import { useNow } from '../useNow'
+import { useNow } from '../../../lib/useNow'
 import { BigCode, Button, Card, CardTitle, DetailRow, LifecycleCard, Notice, PageHeader, PolicyNote, StatusTag } from '../ui'
 
 export default function ParkingCheckInPage() {

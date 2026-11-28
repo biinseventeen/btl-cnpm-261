@@ -10,7 +10,7 @@ import {
   checkInErrorMessage, combineDateTime, formatCountdown, formatDateTime, formatShortDate, formatTime, hubLabel,
   reserveErrorMessage, roundUpMinutes, toDateInput, toTimeInput,
 } from '../format'
-import { useNow } from '../useNow'
+import { useNow } from '../../../lib/useNow'
 import { BigCode, Button, Card, CardTitle, DetailRow, Field, inputClass, LifecycleCard, Notice, PageHeader, PolicyNote, StatusTag } from '../ui'
 
 const MINUTE = 60 * 1000

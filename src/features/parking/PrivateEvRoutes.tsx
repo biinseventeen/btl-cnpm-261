@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router'
-import { useScrollTop } from './useScrollTop'
+import { useScrollTop } from '../../lib/useScrollTop'
 import ChargingRequestDetailPage from './pages/ChargingRequestDetailPage'
 import PrivateEvChargingPage from './pages/PrivateEvChargingPage'
 

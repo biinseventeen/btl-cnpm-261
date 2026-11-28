@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { initialSeed } from '../data/mockData'
 import { useMobilityStore } from './useMobilityStore'
 import { diffChargingRequests, PARKING_RULES } from './parkingSlice'
 import type { ChargingRequest, ParkingSlot } from '../types'
@@ -11,6 +12,8 @@ const request = (id: string) => S().chargingRequests.find((item) => item.request
 const point = (id: string) => S().chargingPoints.find((item) => item.chargingPointId === id)!
 
 const MINUTE = 60 * 1000
+// H1 occupiedSlots also counts the shared vehicles parked there
+const H1_BASE = initialSeed.hubs.find((item) => item.hubId === 'H1')!.occupiedSlots
 const START = new Date('2026-11-26T08:00:00+07:00').getTime()
 const inMinutes = (minutes: number) => new Date(Date.now() + minutes * MINUTE).toISOString()
 const advance = (minutes: number) => vi.setSystemTime(Date.now() + minutes * MINUTE)
@@ -38,7 +41,8 @@ afterEach(() => vi.useRealTimers())
 describe('seed data', () => {
   it('keeps H1 counters consistent with the slot map and reservations', () => {
     const h1Occupied = S().parkingSlots.filter((item) => item.hubId === 'H1' && item.status === 'OCCUPIED').length
-    expect(h1Occupied).toBe(hub('H1').occupiedSlots)
+    const h1Vehicles = S().vehicles.filter((item) => item.hubId === 'H1' && item.status !== 'IN_USE' && item.status !== 'IN_TRANSIT').length
+    expect(h1Occupied + h1Vehicles).toBe(hub('H1').occupiedSlots)
     expect(S().parkingReservations.filter((item) => item.hubId === 'H1' && item.status === 'HELD')).toHaveLength(hub('H1').heldSlots)
   })
 })
@@ -63,7 +67,7 @@ describe('reserveParking', () => {
 
   it('rejects a full hub and gives the last unit to only one student (TC-PK-01)', () => {
     expect(S().reserveParking({ studentId: 'S-02', hubId: 'H3', arrivalTime: inMinutes(30) })).toEqual({ ok: false, reason: 'HUB_FULL' })
-    useMobilityStore.setState((state) => ({ hubs: state.hubs.map((item) => item.hubId === 'H2' ? { ...item, occupiedSlots: 19 } : item) }))
+    useMobilityStore.setState((state) => ({ hubs: state.hubs.map((item) => item.hubId === 'H2' ? { ...item, occupiedSlots: item.totalSlots - 1 } : item) }))
     expect(S().reserveParking({ studentId: 'S-02', hubId: 'H2', arrivalTime: inMinutes(30) }).ok).toBe(true)
     expect(S().reserveParking({ studentId: 'S-05', hubId: 'H2', arrivalTime: inMinutes(30) })).toEqual({ ok: false, reason: 'HUB_FULL' })
     expect(hub('H2').heldSlots).toBe(1)
@@ -116,7 +120,7 @@ describe('checkInParking', () => {
     expect(new Date(updated.slotHoldExpiresAt!).getTime() - Date.now()).toBe(PARKING_RULES.slotHoldMinutes * MINUTE)
     expect(slot('A-12')).toMatchObject({ status: 'ASSIGNED', vehicleId: 'PE-018' })
     expect(slot('A-03').status).toBe('FREE') // stale sensor, skipped
-    expect(hub('H1')).toMatchObject({ heldSlots: 2, occupiedSlots: 12 })
+    expect(hub('H1')).toMatchObject({ heldSlots: 2, occupiedSlots: H1_BASE })
   })
 
   it('ignores a repeated check-in', () => {
@@ -166,9 +170,9 @@ describe('reportSlotSensor', () => {
     expect(S().reportSlotSensor('A-12', 'OCCUPIED')).toBe('ARRIVED')
     expect(reservation(id).status).toBe('ARRIVED')
     expect(slot('A-12').status).toBe('OCCUPIED')
-    expect(hub('H1')).toMatchObject({ heldSlots: 1, occupiedSlots: 13 })
+    expect(hub('H1')).toMatchObject({ heldSlots: 1, occupiedSlots: H1_BASE + 1 })
     expect(S().reportSlotSensor('A-12', 'OCCUPIED')).toBe('IGNORED')
-    expect(hub('H1').occupiedSlots).toBe(13)
+    expect(hub('H1').occupiedSlots).toBe(H1_BASE + 1)
   })
 
   it('completes the reservation when the vehicle leaves', () => {
@@ -178,7 +182,7 @@ describe('reportSlotSensor', () => {
     expect(S().reportSlotSensor('A-12', 'FREE')).toBe('COMPLETED')
     expect(reservation(id).status).toBe('COMPLETED')
     expect(slot('A-12').status).toBe('FREE')
-    expect(hub('H1').occupiedSlots).toBe(12)
+    expect(hub('H1').occupiedSlots).toBe(H1_BASE)
   })
 
   it('does not commit after the slot hold ran out (TC-PK-09)', () => {
@@ -202,9 +206,9 @@ describe('reportSlotSensor', () => {
     const incidentsBefore = S().incidents.length
     expect(S().reportSlotSensor('A-14', 'OCCUPIED')).toBe('UNEXPECTED_OCCUPANCY')
     expect(S().incidents).toHaveLength(incidentsBefore + 1)
-    expect(hub('H1').occupiedSlots).toBe(13)
+    expect(hub('H1').occupiedSlots).toBe(H1_BASE + 1)
     expect(S().reportSlotSensor('A-14', 'FREE')).toBe('VEHICLE_LEFT')
-    expect(hub('H1').occupiedSlots).toBe(12)
+    expect(hub('H1').occupiedSlots).toBe(H1_BASE)
   })
 })
 
@@ -267,7 +271,7 @@ describe('checkOutParking', () => {
     expect(S().checkOutParking('S-02', id)).toEqual({ ok: true })
     expect(reservation(id).status).toBe('COMPLETED')
     expect(slot('A-12').status).toBe('FREE')
-    expect(hub('H1')).toMatchObject({ heldSlots: 1, occupiedSlots: 12 })
+    expect(hub('H1')).toMatchObject({ heldSlots: 1, occupiedSlots: H1_BASE })
   })
 })
 

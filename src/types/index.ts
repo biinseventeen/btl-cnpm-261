@@ -21,6 +21,8 @@ export interface Hub {
   incomingReserved: number
 }
 
+export type VehicleType = 'E_BIKE' | 'E_SCOOTER'
+
 export interface Vehicle {
   vehicleId: VehicleId
   hubId: HubId
@@ -28,6 +30,25 @@ export interface Vehicle {
   status: VehicleStatus
   lastHeartbeat: string
   faultCode?: string
+  vehicleType?: VehicleType
+}
+
+// One shared-vehicle booking; after the QR pickup the same record tracks the trip
+export type VehicleReservationStatus = 'RESERVED' | 'IN_USE' | 'COMPLETED' | 'EXPIRED' | 'CANCELLED'
+export interface VehicleReservation {
+  reservationId: string
+  studentId: string
+  vehicleId: VehicleId
+  hubId: HubId
+  status: VehicleReservationStatus
+  createdAt: string
+  expiresAt: string
+  pickedUpAt?: string
+  startBattery?: number
+  locked?: boolean
+  returnedAt?: string
+  returnHubId?: HubId
+  returnOutcome?: VehicleStatus
 }
 
 export type ChargingRequestStatus =
@@ -128,14 +149,23 @@ export interface PrivateEV {
 }
 
 export type IncidentStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED'
+export type IncidentSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+export interface IncidentEvent {
+  at: string
+  action: string
+}
 export interface OperationalIncident {
   incidentId: string
   assetId: string
   hubId: HubId
   title: string
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+  severity: IncidentSeverity
   status: IncidentStatus
   createdAt: string
+  faultCode?: string
+  technicianNotifiedAt?: string
+  resolvedAt?: string
+  history?: IncidentEvent[]
 }
 
 export interface DispatchOrder {
@@ -144,14 +174,70 @@ export interface DispatchOrder {
   destinationHubId: HubId
   vehicleIds: VehicleId[]
   status: 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+  createdAt?: string
+  etaMinutes?: number
+  completedAt?: string
+  origin?: 'MANUAL' | 'SIMULATION'
 }
 
-export interface SimulationPreview {
-  previewId: string
-  sourceHubId: HubId
-  destinationHubId: HubId
-  vehicleIds: VehicleId[]
-  generatedAt: string
-  sourceAvailableCountAtPreview: number
-  status: 'READY' | 'STALE' | 'APPLIED'
+// Manual change of the charging queue order; the reason is mandatory (audit trail)
+export interface ChargingQueueAdjustment {
+  adjustmentId: string
+  requestId: string
+  fromPosition: number
+  toPosition: number
+  reason: string
+  actor: string
+  at: string
+}
+
+export type SimulationScenarioType = 'DEMAND_SURGE' | 'HUB_FULL' | 'POWER_OUTAGE' | 'CHARGER_FAULT' | 'DORM_CONCENTRATION'
+export interface SimulationParams {
+  scenario: SimulationScenarioType
+  hubId: HubId
+  scope: 'NETWORK' | 'LOCAL'
+  demandChangePct: number
+  durationMinutes: number
+  windowStart: string
+  extraTrips: number
+  useSnapshot: boolean
+}
+export interface SimulationHubResult {
+  hubId: HubId
+  totalSlots: number
+  snapshotAvailable: number
+  snapshotParked: number
+  afterDemandAvailable: number
+  afterDemandParked: number
+  afterPlanAvailable: number
+  afterPlanParked: number
+}
+export type SimulationRecommendationKind = 'DISPATCH' | 'CHARGING_PRIORITY' | 'REDIRECT'
+export interface SimulationRecommendation {
+  recommendationId: string
+  kind: SimulationRecommendationKind
+  title: string
+  description: string
+  precheck: string
+  sourceHubId?: HubId
+  destinationHubId?: HubId
+  vehicleIds?: VehicleId[]
+  requestIds?: string[]
+  // Live condition re-checked on apply: source must still hold at least this many eligible vehicles
+  minSourceAvailable?: number
+  minDestinationFree?: number
+  status: 'PROPOSED' | 'APPLIED' | 'STALE'
+  staleReason?: string
+  decidedAt?: string
+}
+export interface SimulationRun {
+  runId: string
+  snapshotId: string
+  snapshotAt: string
+  params: SimulationParams
+  status: 'COMPLETED' | 'INVALID' | 'TIMEOUT'
+  estimatedSeconds: number
+  error?: string
+  hubResults: SimulationHubResult[]
+  recommendations: SimulationRecommendation[]
 }

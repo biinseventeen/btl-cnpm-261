@@ -1,4 +1,4 @@
-// Parking & Private EV actions (owner: Lợi). Merged into useMobilityStore.
+// Parking & Private EV actions (logic owner: Thịnh; first version written by Lợi). Merged into useMobilityStore.
 // Capacity uses the shared Hub counters: a reservation holds one unit (heldSlots) until the
 // slot sensor confirms the vehicle, then the unit moves to occupiedSlots.
 import type { StateCreator } from 'zustand'
@@ -7,6 +7,7 @@ import type {
   ChargingRequest, ChargingRequestEvent, ChargingRequestStatus, Hub, ParkingFailureReason,
   ParkingReservation, ParkingReservationStatus, ParkingSensorStatus, ParkingSlot,
 } from '../types'
+import { adjustHub, hubFreeSlots, MINUTE, nextCode, updateById, type Fail } from './storeUtils'
 import type { MobilityState } from './useMobilityStore'
 
 export const PARKING_RULES = {
@@ -19,8 +20,6 @@ export const PARKING_RULES = {
 export const OPEN_RESERVATION_STATUSES: ParkingReservationStatus[] = ['HELD', 'SLOT_ASSIGNED', 'ARRIVED']
 export const ACTIVE_CHARGING_STATUSES: ChargingRequestStatus[] = ['NEEDS_VERIFICATION', 'WAITING', 'SCHEDULED', 'CHARGING']
 export const CANCELLABLE_CHARGING_STATUSES: ChargingRequestStatus[] = ['NEEDS_VERIFICATION', 'WAITING', 'SCHEDULED']
-
-type Fail<R extends string> = { ok: false; reason: R }
 
 export type ReserveParkingResult =
   | { ok: true; reservationId: string }
@@ -67,33 +66,12 @@ export interface ParkingSlice {
   recordChargingRequestChanges: (previous: ChargingRequest[], next: ChargingRequest[]) => void
 }
 
-const MINUTE = 60 * 1000
-
-export const availableCapacity = (hub: Hub) => Math.max(0, hub.totalSlots - hub.occupiedSlots - hub.heldSlots - hub.incomingReserved)
+export const availableCapacity = (hub: Hub) => hubFreeSlots(hub)
 
 export const isTelemetryFresh = (lastTelemetryAt: string | undefined, now = Date.now()) =>
   !!lastTelemetryAt && now - new Date(lastTelemetryAt).getTime() <= PARKING_RULES.telemetryMaxAgeMinutes * MINUTE
 
-const dateStamp = (now: number) => {
-  const date = new Date(now)
-  return `${String(date.getFullYear()).slice(2)}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
-}
-
-const nextCode = (prefix: string, existingIds: string[], now: number) => {
-  const max = existingIds.filter((id) => id.startsWith(`${prefix}-`))
-    .reduce((highest, id) => Math.max(highest, Number(id.split('-').pop()) || 0), 0)
-  return `${prefix}-${dateStamp(now)}-${String(max + 1).padStart(3, '0')}`
-}
-
-const updateHub = (hubs: Hub[], hubId: string, change: Partial<Record<'heldSlots' | 'occupiedSlots', number>>) =>
-  hubs.map((hub) => hub.hubId === hubId ? {
-    ...hub,
-    heldSlots: Math.max(0, hub.heldSlots + (change.heldSlots ?? 0)),
-    occupiedSlots: Math.max(0, hub.occupiedSlots + (change.occupiedSlots ?? 0)),
-  } : hub)
-
-const updateById = <T, K extends keyof T>(items: T[], key: K, id: T[K], change: Partial<T>) =>
-  items.map((item) => item[key] === id ? { ...item, ...change } : item)
+const updateHub = adjustHub
 
 const freeSlot = (slots: ParkingSlot[], slotId: string | undefined) => slotId
   ? slots.map((slot) => slot.slotId === slotId ? { ...slot, status: 'FREE' as const, vehicleId: undefined } : slot)

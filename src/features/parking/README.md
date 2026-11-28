@@ -28,7 +28,7 @@ Action nằm ở `src/store/parkingSlice.ts`, test ở `src/store/parkingSlice.t
 | `checkInParking` | Chọn ô FREE có cảm biến ONLINE (theo mã ô) → SLOT_ASSIGNED, giữ ô 10 phút. Không có ô → CHECK_IN_FAILED (`NO_PHYSICAL_SLOT` / `SENSOR_UNAVAILABLE`), trả sức chứa, gọi `raiseIncident` |
 | `reportSlotSensor(slotId, 'OCCUPIED' \| 'FREE')` | Xe vào đúng ô đã cấp → ARRIVED (`held − 1`, `occupied + 1`); xe rời → COMPLETED. Xe đỗ không có đơn → incident |
 | `setSlotSensorStatus` | ONLINE / STALE / FAULT; FAULT sinh incident |
-| `sweepParkingExpiry` | HELD quá `arrival + 15'` → EXPIRED; ô giữ quá 10 phút → nhả ô, đơn về HELD (hoặc EXPIRED nếu đơn cũng hết hạn). Chạy mỗi 5 giây qua `expiryJob.ts` |
+| `sweepParkingExpiry` | HELD quá `arrival + 15'` → EXPIRED; ô giữ quá 10 phút → nhả ô, đơn về HELD (hoặc EXPIRED nếu đơn cũng hết hạn). Chạy mỗi 5 giây qua `src/app/demoClock.ts` |
 | `checkOutParking` | ARRIVED → COMPLETED |
 | `submitPrivateEvChargingRequest` | Tạo `ChargingRequest` nguồn `STUDENT`, trạng thái `WAITING`, không gán cổng. Pin lấy từ telemetry (≤ 30 phút) hoặc nhập tay có xác nhận (`batteryVerified = false`) |
 | `cancelChargingRequest` | Hủy request của chính mình khi còn chờ / đã xếp lịch; trả cổng nếu đang ASSIGNED cho xe đó |

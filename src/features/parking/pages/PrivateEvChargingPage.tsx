@@ -10,7 +10,7 @@ import PrivateEvCard from '../components/PrivateEvCard'
 import { describeRequest } from '../chargingStatus'
 import { DEMO_STUDENT_ID } from '../constants'
 import { chargingErrorMessage, combineDateTime, formatShortDate, formatTime, hubLabel, roundUpMinutes, toDateInput, toTimeInput } from '../format'
-import { useNow } from '../useNow'
+import { useNow } from '../../../lib/useNow'
 import { BigCode, Button, Card, CardTitle, DetailRow, Field, inputClass, Notice, PageHeader, StatusTag } from '../ui'
 
 const MINUTE = 60 * 1000

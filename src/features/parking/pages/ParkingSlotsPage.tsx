@@ -7,8 +7,8 @@ import { availableCapacity } from '../../../store/parkingSlice'
 import type { ParkingReservationStatus, ParkingSensorStatus, ParkingSlot } from '../../../types'
 import SlotGrid from '../components/SlotGrid'
 import { formatTime, hubLabel } from '../format'
-import { useNow } from '../useNow'
-import { useScrollTop } from '../useScrollTop'
+import { useNow } from '../../../lib/useNow'
+import { useScrollTop } from '../../../lib/useScrollTop'
 import { Card, CardTitle, PageHeader, StatusTag, type Tone } from '../ui'
 
 const reservationTone: Record<ParkingReservationStatus, Tone> = {

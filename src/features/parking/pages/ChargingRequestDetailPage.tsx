@@ -7,7 +7,7 @@ import PrivateEvCard from '../components/PrivateEvCard'
 import { describeEvent, describeRequest, latestChange } from '../chargingStatus'
 import { DEMO_STUDENT_ID } from '../constants'
 import { formatShortDate, formatTime } from '../format'
-import { useNow } from '../useNow'
+import { useNow } from '../../../lib/useNow'
 import { BigCode, Button, Card, CardTitle, DetailRow, Notice, PageHeader, StatusTag, type Tone } from '../ui'
 
 const dotColor: Record<Tone, string> = {
