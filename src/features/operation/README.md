@@ -1,7 +1,8 @@
 # Operation & What-if Simulation
 
-- **UI/presentation:** Lợi (`pages/`, `activity.ts`, `simulation.ts`).
-- **Business logic:** Thịnh (`src/store/operationSlice.ts`). Bản đầu do Lợi viết để nối UI, Thịnh review và tiếp quản.
+- **Phụ trách (UI và logic):** Thịnh, theo file phân công Submission 4.
+- **Kiểm tra UI so với Figma:** Lợi.
+- Code hiện tại (`pages/`, `activity.ts`, `simulation.ts`, `src/store/operationSlice.ts`) là bản nháp Lợi dựng theo Figma để cả nhóm chạy thử luồng xuyên module. Thịnh toàn quyền viết lại, sửa hoặc xóa.
 
 ## Route
 

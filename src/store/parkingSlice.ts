@@ -1,4 +1,4 @@
-// Parking & Private EV actions (logic owner: Thịnh; first version written by Lợi). Merged into useMobilityStore.
+// Parking & Private EV actions (owner: Lợi, per the Submission 4 assignment). Merged into useMobilityStore.
 // Capacity uses the shared Hub counters: a reservation holds one unit (heldSlots) until the
 // slot sensor confirms the vehicle, then the unit moves to occupiedSlots.
 import type { StateCreator } from 'zustand'
