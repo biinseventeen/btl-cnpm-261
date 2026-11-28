@@ -1,6 +1,22 @@
 # Charging & Resource Management
 
-- **UI/presentation:** Lợi (`ChargingPage.tsx` and visual components).
-- **Business logic:** Kiệt; shared contracts/state live in `src/types/` and `src/store/`.
+- **UI/presentation:** Lợi (`pages/`, `components/`).
+- **Business logic:** Kiệt (`src/store/chargingSlice.ts`). Bản đầu do Lợi viết để nối UI, Kiệt review và tiếp quản.
 
-Charging requests from shared vehicles and private EVs use the shared store. Submission queues a request; scheduling may assign only an `AVAILABLE` charging point. `ASSIGNED` represents a reservation and does not mean the vehicle is charging.
+## Route
+
+| Route | Màn hình | Frame Figma |
+|---|---|---|
+| `/operator/hubs` | Theo dõi xe và cổng sạc theo Hub, thao tác cổng | `112:4` |
+| `/operator/charging-queue` | Hàng đợi sạc, điều chỉnh thủ công có lý do, gán cổng | `112:621` |
+| `/operator/dispatch` | Tạo và bàn giao lệnh điều phối xe giữa Hub | `112:330` |
+
+## Quy tắc
+
+- Gửi yêu cầu sạc không gán cổng. Cổng chỉ gán khi đang AVAILABLE và cùng Hub; `ASSIGNED` là giữ chỗ, chỉ sang `CHARGING` khi xe kết nối (`startCharging`).
+- Thứ tự hàng đợi: pin hiệu lực thấp hơn trước (pin nhập tay chưa xác minh tính tối thiểu 21%, nên không được ưu tiên cao), rồi chờ lâu hơn. Thứ tự đã chỉnh tay được giữ, yêu cầu mới chèn theo quy tắc.
+- `moveChargingRequest` bắt buộc lý do ≥ 5 ký tự, lưu người thao tác, thứ tự cũ/mới.
+- `reportChargingPointFault`: cổng → ERROR, yêu cầu đang dùng quay lại hàng đợi, tạo incident. Khôi phục qua màn Sự cố.
+- Điều phối: chỉ xe sẵn sàng, pin > 20%, heartbeat còn hiệu lực; Hub nguồn giữ tối thiểu 3 xe; Hub đích phải đủ chỗ ngay lúc tạo lệnh. Tạo lệnh: nguồn `occupied − n`, đích `incomingReserved + n`; bàn giao: đích `incoming − n`, `occupied + n`; hủy hoàn lại.
+
+Test: `src/store/chargingSlice.test.ts`.
